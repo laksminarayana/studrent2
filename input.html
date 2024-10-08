@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Input Area</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: auto;
+            padding: 0;
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .input-container {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 1000px;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 2px solid #FF5722;
+            border-radius: 5px;
+            background-color: #FFEB3B;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            height: 40px;
+            max-height: 80px;
+            margin-right: 5px;
+            padding: 8px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            resize: none;
+            overflow-y: auto;
+        }
+
+        .input-area button {
+            background-color: #007BFF;
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            border: none;
+        }
+
+        .input-area button:hover {
+            background-color: #0056b3;
+        }
+
+        #statementsContainer {
+            margin-top: 10px;
+            max-height: calc(50vh - 120px);
+            overflow-y: auto;
+        }
+
+        .statement {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .statement:hover {
+            background-color: #e0e0e0;
+        }
+
+        .statement-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .like-section {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .like-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #4CAF50;
+            transition: color 0.3s;
+        }
+
+        .liked {
+            color: red;
+        }
+
+        .like-count {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .delete-button {
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .delete-button:hover {
+            color: darkred;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="input-container">
+        <h2>Input Area</h2>
+        <div class="input-area">
+            <textarea id="userInput" placeholder="Enter a statement" required></textarea>
+            <button id="submitButton">Submit</button>
+        </div>
+        <div id="statementsContainer"></div>
+    </div>
+
+    <script>
+        // Load likes and statements from localStorage
+        const userLikes = JSON.parse(localStorage.getItem('userLikes')) || {}; 
+        let statements = JSON.parse(localStorage.getItem('statements')) || []; 
+        let currentUser = localStorage.getItem('currentUser'); // Get current user from local storage
+
+        // Check if user is logged in, else prompt for username
+        if (!currentUser) {
+            currentUser = prompt("Enter your username:");
+            localStorage.setItem('currentUser', currentUser); // Store username
+        }
+
+        // Function to sort statements by likes
+        function sortStatementsByLikes() {
+            return statements
+                .map((statement, index) => ({
+                    ...statement,
+                    likes: userLikes[index] ? userLikes[index].length : 0,
+                    index: index
+                }))
+                .sort((a, b) => b.likes - a.likes); // Sort by descending likes
+        }
+
+        // Load existing statements on page load
+        function loadStatements() {
+            const sortedStatements = sortStatementsByLikes(); // Sort statements by number of likes
+
+            // Clear the current container before loading new statements
+            document.getElementById('statementsContainer').innerHTML = '';
+
+            sortedStatements.forEach(({ text, user, index, likes }) => {
+                displayStatement(text, user, index, likes);
+            });
+        }
+
+        // Function to display a statement
+        function displayStatement(statementText, user, index, likeCount = 0) {
+            const statementDiv = document.createElement('div');
+            statementDiv.className = 'statement';
+
+            const statementContent = document.createElement('div');
+            statementContent.className = 'statement-content';
+
+            const statementTextElement = document.createElement('span');
+            statementTextElement.textContent = `${user}: ${statementText}`; // Displaying user
+
+            const likeSection = document.createElement('div');
+            likeSection.className = 'like-section';
+
+            const likeButton = document.createElement('button');
+            likeButton.className = 'like-button';
+            likeButton.innerHTML = '&#10084;'; 
+            likeButton.onclick = function () {
+                if (!userLikes[index]) {
+                    userLikes[index] = [];
+                }
+                if (!userLikes[index].includes(currentUser)) {
+                    let currentLikes = parseInt(likeCountElement.textContent.split(' ')[0]) || 0;
+                    currentLikes++;
+                    likeCountElement.textContent = `${currentLikes} Likes`;
+                    userLikes[index].push(currentUser);
+                    localStorage.setItem('userLikes', JSON.stringify(userLikes));
+                    likeButton.classList.add('liked');
+                } else {
+                    alert('You can only like this statement once.');
+                }
+                // Refresh statements after like
+                refreshStatements();
+            };
+
+            const likeCountElement = document.createElement('span');
+            likeCountElement.className = 'like-count';
+            likeCountElement.textContent = `${likeCount} Likes`;
+
+            if (userLikes[index] && userLikes[index].includes(currentUser)) {
+                likeButton.classList.add('liked');
+            }
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.innerHTML = '&#128465;';
+            deleteButton.onclick = function () {
+                if (user === currentUser) { // Check if the current user is the owner of the statement
+                    deleteStatement(index);
+                } else {
+                    alert('You can only delete your own statements.');
+                }
+            };
+
+            likeSection.appendChild(likeButton);
+            likeSection.appendChild(likeCountElement);
+
+            statementContent.appendChild(statementTextElement);
+            statementContent.appendChild(likeSection);
+
+            statementDiv.appendChild(statementContent);
+            statementDiv.appendChild(deleteButton);
+            document.getElementById('statementsContainer').appendChild(statementDiv);
+        }
+
+        // Function to delete a statement
+        function deleteStatement(index) {
+            statements.splice(index, 1); 
+            localStorage.setItem('statements', JSON.stringify(statements)); 
+            localStorage.setItem('userLikes', JSON.stringify(userLikes)); 
+            refreshStatements();
+        }
+
+        // Refresh and sort the statements
+        function refreshStatements() {
+            loadStatements();
+        }
+
+        // Submit new statement
+        document.getElementById('submitButton').onclick = function () {
+            const userInput = document.getElementById('userInput');
+            const statementText = userInput.value.trim();
+            if (statementText === '') {
+                alert('Please enter a statement.');
+                return;
+            }
+
+            // Check for duplicate statements
+            if (statements.some(statement => statement.text === statementText && statement.user === currentUser)) {
+                alert('You have already added this statement.');
+                return;
+            }
+
+            const newStatement = {
+                text: statementText,
+                user: currentUser // Associate the statement with the current user
+            };
+
+            statements.push(newStatement); 
+            localStorage.setItem('statements', JSON.stringify(statements)); 
+            refreshStatements();
+            userInput.value = ''; 
+        };
+
+        // Load existing statements on page load
+        loadStatements();
+    </script>
+
+</body>
+</html>

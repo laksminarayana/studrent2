@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 400px;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 8px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .registration {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Register</h2>
+        <form id="register">
+            <input type="text" id="newUsername" placeholder="Username" required><br>
+            <input type="password" id="newPassword" placeholder="Password" required><br>
+            <button type="submit">Register</button>
+        </form>
+        <div class="registration">
+            <p>Already have an account? <button onclick="location.href='login.html'">Login</button></p>
+        </div>
+    </div>
+
+    <script>
+        // Load registered users from local storage
+        const users = JSON.parse(localStorage.getItem('users')) || {};
+
+        // Handle user registration
+        document.getElementById('register').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const newUsername = document.getElementById('newUsername').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            // Check if the username is already taken
+            if (users[newUsername]) {
+                alert('Username already exists. Please choose another one.');
+                return;
+            }
+
+            // Register the new user
+            users[newUsername] = newPassword;
+            localStorage.setItem('users', JSON.stringify(users)); // Save updated users to local storage
+            alert('Registration successful! You can now log in.');
+            document.getElementById('register').reset(); // Clear the form
+        });
+    </script>
+
+</body>
+</html>
